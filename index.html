@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Upload SVG to Text/JSON</title>
+</head>
+<body>
+  <h2>Upload an SVG file</h2>
+  <form id="svg-upload-form">
+    <input type="file" id="svg-file-input" accept=".svg" required />
+    <label>
+      <input type="checkbox" id="as-json" />
+      Get as JSON
+    </label>
+    <button type="submit">Upload</button>
+  </form>
+  <h3>SVG Content:</h3>
+  <pre id="result" style="white-space: pre-wrap; word-break: break-word;"></pre>
+
+  <script>
+    document.getElementById('svg-upload-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const fileInput = document.getElementById('svg-file-input');
+      if (!fileInput.files.length) {
+        alert('Please choose an SVG file!');
+        return;
+      }
+      const asJson = document.getElementById('as-json').checked;
+      const formData = new FormData();
+      formData.append('svg', fileInput.files[0]);
+      const url = 'http://localhost:3000/upload' + (asJson ? '?format=json' : '');
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formData
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        let resultText = "";
+        if (asJson) {
+          const data = await response.json();
+          resultText = JSON.stringify(data, null, 2);
+        } else {
+          resultText = await response.text();
+        }
+        document.getElementById('result').textContent = resultText;
+      } catch (err) {
+        document.getElementById('result').textContent = 'Error: ' + err;
+      }
+    });
+  </script>
+</body>
+</html>
