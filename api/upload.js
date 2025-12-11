@@ -3,7 +3,6 @@ import xml2js from 'xml2js';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Convert multer middleware for serverless
 function runMiddleware(req, res, fn) {
   return new Promise((resolve, reject) => {
     fn(req, res, (result) => {
@@ -15,13 +14,23 @@ function runMiddleware(req, res, fn) {
 
 export const config = {
   api: {
-    bodyParser: false, // Important! We need raw multipart
+    bodyParser: false,
   },
 };
 
 export default async function handler(req, res) {
+  // 🟩 CORS Headers
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // 🟩 Preflight request
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   await runMiddleware(req, res, upload.single('svg'));
@@ -47,6 +56,6 @@ export default async function handler(req, res) {
     }
   }
 
-  res.setHeader('Content-Type', 'text/plain');
-  return res.send(svgText);
+  res.setHeader("Content-Type", "text/plain");
+  res.send(svgText);
 }
