@@ -28,7 +28,7 @@
       const asJson = document.getElementById('as-json').checked;
       const formData = new FormData();
       formData.append('svg', fileInput.files[0]);
-      const url = 'http://localhost:3000/upload' + (asJson ? '?format=json' : '');
+      const url = 'https://svg-converter-weld.vercel.app/api/upload' + (asJson ? '?format=json' : '');
       try {
         const response = await fetch(url, {
           method: 'POST',
